@@ -1,7 +1,8 @@
 # pve-storage-info
 
-A lightweight, fast, parallelized storage-inspection tool for **Proxmox VE**.  
-It collects detailed information about VM and container disks across a cluster, aggregates storage usage, and provides multiple output formats (table, CSV, JSON).
+A lightweight, ~~fast~~, parallelized (not tested) storage-inspection wrapper over some pvesh calls for **Proxmox VE**.  
+It collects information about VM and container disks across a cluster, aggregates storage usage, and provides multiple output formats (table, CSV, JSON).
+
 
 ---
 
@@ -35,7 +36,7 @@ This installs:
 Run the tool:
 
 ```bash
-pve-storage-info
+pve-storage-info [OPTIONS]
 ```
 
 ---
@@ -57,111 +58,24 @@ ln -s /opt/pve-tools/pve-storage-info.py /usr/local/bin/pve-storage-info
 # Usage
 
 ```bash
-pve-storage-info [OPTIONS]
+pve-storage-info --help
 ```
 
 ---
 
-# Options
-
-## Filtering
-
-### Filter by VMID(s)
-```bash
---vmid 100,101,121
-```
-
-### Filter by node(s)
-```bash
---node pve01,pve02
-```
-
----
-
-## Output control
-
-### Output formats
-```bash
---output table    # default
---output csv
---output json
-```
-
-### Disable header in CSV
-```bash
---no-header
-```
-
-### Human-readable sizes (table mode only)
-```bash
---human
-```
-
----
-
-## Parallelism
-
-### Number of worker threads
-```bash
---workers 8
-```
-
-Default: up to 8 depending on VM count.
-
----
-
-# Listing modes
-
-### List all cluster nodes
-```bash
---list-nodes
-```
-
-### List all VMIDs
-```bash
---list-vmids
-```
-
-### List storages per node
-```bash
---list-storages
-```
-
-Shows:
-
-- total MB  
-- used MB  
-- available MB  
-- used %  
-- available %
-
----
-
-# Aggregation modes
-
-### Per-VM total disk usage
-```bash
---total-per-vm
-```
-
-### Per-node total disk usage
-```bash
---total-per-node
-```
-
-### Per-storage usage per VM
-```bash
---vm-per-storage
-```
-
----
-
-# Cluster information
+# Examples
 
 ### Show cluster/ring0/external IP information
 ```bash
---cluster-info
+pve-storage-info --cluster-info
 ```
+```bash
+pve-storage-info --output json
+```
+```bash
+pve-storage-info --output csv
+```
+![Human table output](assets/screenshots/pve-storage-info--cluster-info.png)
 
 Outputs:
 
@@ -171,40 +85,53 @@ Outputs:
 - external IP  
 - external CIDR  
 - external gateway  
-
 ---
 
-# Examples
-
-### List all disks in cluster
-```bash
-pve-storage-info
-```
-
-### Show disks for VM 120
-```bash
-pve-storage-info --vmid 120
-```
-
-### CSV output without header
-```bash
-pve-storage-info --output csv --no-header
-```
-
-### Human-readable table
+### List all vms and their disks in cluster
 ```bash
 pve-storage-info --human
 ```
+![Human table output](assets/screenshots/pve-storage-info--human.png)
+
+### Filter nodes
+```bash
+pve-storage-info --node node1,node2
+```
+![Human table output](assets/screenshots/pve-storage-info--node.png)
+
+### Filter nodes and vm's
+if VMID not in nodes selected - it will not be shown (109 for example - its on node pve03)
+```bash
+pve-storage-info --node node1,node2 --vmid id1,id2,id3
+```
+![Human table output](assets/screenshots/pve-storage-info--node--vmid.png)
 
 ### Show per-node storage usage
+buggy (yellow highlighted)
 ```bash
 pve-storage-info --list-storages
 ```
+![Human table output](assets/screenshots/pve-storage-info--list-storages.png)
 
-### Show per-VM aggregated usage
+### More examples
+(1) we want see all disks for vm's 1000,999,123 across cluster
 ```bash
-pve-storage-info --total-per-vm
+pve-storage-info --vmid 1000,999,123
 ```
+(2) now, we want know how much disk space those vm's drives occupy on nodes storages
+```bash
+pve-storage-info --vmid 1000,999,123 --vm-per-storage
+```
+(3) how much all vm's drives occupy space
+```bash
+pve-storage-info --vmid 1000,999,123 --total-per-vm
+```
+(4) and how much those vm's occupy disk space on nodes
+```bash
+pve-storage-info --vmid 1000,999,123 --total-per-node
+```
+![Human table output](assets/screenshots/pve-storage-info--vm-per-storage.png)
+
 
 ---
 
