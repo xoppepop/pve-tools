@@ -187,6 +187,7 @@ def fetch_vm_disks(cluster_name, vm_entry):
                 key.startswith("scsi")
                 or key.startswith("ide")
                 or key.startswith("virtio")
+                or key.startswith("sata")
             ):
                 continue
             if "media=cdrom" in value_str:
